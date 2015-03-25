@@ -10,21 +10,21 @@ otchanger = {
 
 otchanger.init = function()
 	if (otchanger.config.console) then
-		dofile('data/console.lua')
+		dofile('console.lua')
 		Console.Show()
 	end
 	print("Running " .. _VERSION)
 
 	-- laod libs
-	dofile('data/libs/string.lua')
-	dofile('data/libs/class.lua')
+	dofile('libs/string.lua')
+	dofile('libs/class.lua')
 
 	-- show available lua functions
-	dofile('data/scripts/luafunctions.lua')
+	dofile('scripts/luafunctions.lua')
 
 	-- load project files
-	dofile('data/console.lua')
-	dofile('data/frmMain.lua')
+	dofile('console.lua')
+	dofile('frmMain.lua')
 
 	-- load needed assemblies/types
 	--[[luanet.load_assembly('System.Windows.Forms')
@@ -32,7 +32,7 @@ otchanger.init = function()
 	Application = Forms.Application -- luanet.import_type('System.Windows.Forms.Application')
 	Form = Forms.Form --luanet.import_type('System.Windows.Forms.Form')]]
 
-	dofile('data/frmMain.lua')
+	dofile('frmMain.lua')
 	frmMain():Show()
 end
 

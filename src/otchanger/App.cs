@@ -25,14 +25,22 @@ namespace otchanger
                     LuaRegister.RegisterClass(lua, typeof(App), true);
                     LuaRegister.RegisterClass(lua, typeof(NativeMethods));
 
-                    var fi = new FileInfo("data/init.lua");
-                    if (fi.Exists)
-                        dofile(fi.FullName);
-                    else
+                    foreach(var file in new[] {"data/init.lua", "../data/init.lua", "init.lua"})
                     {
-                        NativeMethods.AllocConsole();
-                        print("cannot find " + fi.FullName);
+                        if(File.Exists(file))
+                        {
+                            var fileInfo = new FileInfo(file);
+                            Directory.SetCurrentDirectory(fileInfo.Directory.FullName);
+                            dofile(fileInfo.FullName);
+                            return;
+                        }
                     }
+
+                    NativeMethods.AllocConsole();
+                    print("cannot find init.lua!");
+                    print("press any key to exit..");
+                    Console.ReadKey(true);
+                    exit();
                 }));
             })
             {
