@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 using NLua;
@@ -23,7 +24,15 @@ namespace otchanger
                     lua.LoadCLRPackage();
                     LuaRegister.RegisterClass(lua, typeof(App), true);
                     LuaRegister.RegisterClass(lua, typeof(NativeMethods));
-                    dofile("data/init.lua");
+
+                    var fi = new FileInfo("data/init.lua");
+                    if (fi.Exists)
+                        dofile(fi.FullName);
+                    else
+                    {
+                        NativeMethods.AllocConsole();
+                        print("cannot find " + fi.FullName);
+                    }
                 }));
             })
             {
