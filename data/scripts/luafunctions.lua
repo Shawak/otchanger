@@ -1,4 +1,4 @@
-function getLuaFunctions()-- by Mock
+local function getLuaFunctions()-- by Mock
 	local str = ""
 	for f,k in pairs(_G) do
 		if type(k) == 'function' then

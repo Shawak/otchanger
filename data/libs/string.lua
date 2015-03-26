@@ -49,9 +49,28 @@ function string:explode(sep, limit)
 end
 
 function string:contains(str, checkCase, start, plain)
-  if(not checkCase) then
+  if not checkCase then
     self = self:lower()
     str = str:lower()
   end
   return string.find(self, str, start and start or 1, plain == nil and true or false)
+end
+
+function string:replace(pattern, replace, limit)
+  return string.gsub(self, pattern, replace, limit)
+end
+
+function string:remove(index, count)
+  if (index < 0) then
+    index = #self + index + 1
+  end
+  return string.sub(self, 0, index - 1) .. string.sub(self, index + count)
+end
+
+function string:insert(index, str)
+  if index >= 0 then
+    return string.sub(self, 0, index) .. str .. string.sub(self, #self - index + 1)
+  else
+    return string.sub(self, 0, #self + index) .. str .. string.sub(self, #self + index + 1)
+  end
 end

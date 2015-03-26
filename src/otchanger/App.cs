@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using NLua;
 
 namespace otchanger
 {
-    public static class App
+    static class App
     {
         static bool stop;
         static Lua lua;
@@ -25,16 +28,14 @@ namespace otchanger
                     LuaRegister.RegisterClass(lua, typeof(App), true);
                     LuaRegister.RegisterClass(lua, typeof(NativeMethods));
 
-                    foreach(var file in new[] {"data/init.lua", "../data/init.lua", "init.lua"})
-                    {
-                        if(File.Exists(file))
+                    foreach (var file in new[] { "data/init.lua", "../data/init.lua", "init.lua" })
+                        if (File.Exists(file))
                         {
                             var fileInfo = new FileInfo(file);
                             Directory.SetCurrentDirectory(fileInfo.Directory.FullName);
                             dofile(fileInfo.FullName);
                             return;
                         }
-                    }
 
                     NativeMethods.AllocConsole();
                     print("cannot find init.lua!");
@@ -58,6 +59,7 @@ namespace otchanger
 
         public static void print(string str)
         {
+            Debug.WriteLine(str);
             Console.WriteLine(str);
         }
 
@@ -83,6 +85,19 @@ namespace otchanger
             {
                 Console.WriteLine(ex);
             }
+        }
+
+        public static string exportAssemblies()
+        {
+            var sb = new StringBuilder();
+            foreach (var ass in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                sb.AppendLine(">> " + ass.FullName);
+                foreach (var name in ass.GetReferencedAssemblies())
+                    sb.AppendLine("> " + name.FullName);
+                sb.AppendLine();
+            }
+            return sb.ToString();
         }
     }
 }
