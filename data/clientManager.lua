@@ -10,28 +10,33 @@ function clientManager:__init()
 end
 
 function clientManager:explore(dir)
-	print(dir)
+	if not Directory.Exists(dir) then
+		return 0
+	end
+
+	local found = 0
 	local files = Directory.GetFiles(dir)
 	for i = 0, files.Length - 1 do
 		local info = FileVersionInfo.GetVersionInfo(files[i])
-		if info.FileDescription == 'Tibia Player' then
-			print(FileInfo(files[i]).FullName)
-			pcall(function()
-				local version = info.FileVersion
-				version = version:replace('%.', '')
-				if #version < 3 then
-					version = version .. '0'
-				elseif #version > 3 then
-					version = version:remove(-1, 1)
-				end
-				version = version:insert(-2, '.')
-				print(version)
-			end)
+		if info.FileDescription == 'Tibia Player' and info.LegalCopyright:contains('CipSoft') then
+			local version = info.FileVersion
+			version = version:replace('%.', '')
+			if #version < 3 then
+				version = version .. '0'
+			elseif #version > 3 then
+				version = version:remove(-1, 1)
+			end
+			version = version:insert(-2, '.')
+			print('client version ' .. version .. ' found in ' .. dir)
+			clients[version] = FileInfo(files[i]).FullName
+			found = found + 1
 		end
 	end
 	
 	local dirs = Directory.GetDirectories(dir)
 	for i = 0, dirs.Length - 1 do
-		self:explore(dirs[i])
+		found = found + self:explore(dirs[i])
 	end
+
+	return found
 end
