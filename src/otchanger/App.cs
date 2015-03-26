@@ -71,7 +71,7 @@ namespace otchanger
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                showException(ex);
             }
         }
 
@@ -83,8 +83,17 @@ namespace otchanger
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                showException(ex);
             }
+        }
+
+        static void showException(Exception ex)
+        {
+            do
+            {
+                Console.WriteLine(ex);
+                ex = ex.InnerException;
+            } while (ex != null);
         }
 
         public static string exportAssemblies()
