@@ -3,10 +3,28 @@ clientManager = class()
 local clients = {}
 
 function clientManager:__init()
-	if (File.Exists(config.files.clients)) then
-		local json = File.ReadAllText(config.files.clients)
-		clients = JsonConvert.Deserialize(json)
+
+end
+
+function clientManager:load()
+	if not File.Exists(config.files.clients) then
+		return
 	end
+end
+
+function clientManager:save()
+
+end
+
+function clientManager:start(version)
+	local fileInfo = clients[version]
+	if not fileInfo then
+		return nil
+	end
+
+	local client = client(fileInfo)
+	client:start()
+	return client
 end
 
 function clientManager:explore(dir)
@@ -28,7 +46,7 @@ function clientManager:explore(dir)
 			end
 			version = version:insert(-2, '.')
 			print('client version ' .. version .. ' found in ' .. dir)
-			clients[version] = FileInfo(files[i]).FullName
+			clients[version] = FileInfo(files[i])
 			found = found + 1
 		end
 	end

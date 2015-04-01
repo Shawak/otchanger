@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -25,8 +24,8 @@ namespace otchanger
                 {
                     lua = new Lua();
                     lua.LoadCLRPackage();
-                    LuaRegister.RegisterClass(lua, typeof(App), true);
-                    LuaRegister.RegisterClass(lua, typeof(NativeMethods));
+                    registerLuaClass(lua, typeof(App), true);
+                    registerLuaClass(lua, typeof(NativeMethods));
 
                     foreach (var file in new[] { "data/init.lua", "../data/init.lua", "init.lua" })
                         if (File.Exists(file))
@@ -50,6 +49,16 @@ namespace otchanger
 
             while (!stop)
                 Thread.Sleep(1);
+        }
+
+        static void registerLuaClass(Lua lua, Type type, bool extractFromClass = false)
+        {
+            if (!extractFromClass)
+                lua.DoString(type.Name + "={}");
+
+            foreach (var method in type.GetMethods())
+                if (method.IsPublic && !method.IsVirtual && !method.IsSecuritySafeCritical)
+                    lua.RegisterFunction(!extractFromClass ? (type.Name + "." + method.Name) : method.Name, lua, method);
         }
 
         public static void exit()

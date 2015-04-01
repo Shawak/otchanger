@@ -61,7 +61,7 @@ function string:replace(pattern, replace, limit)
 end
 
 function string:remove(index, count)
-  if (index < 0) then
+  if index < 0 then
     index = #self + index + 1
   end
   return string.sub(self, 0, index - 1) .. string.sub(self, index + count)
