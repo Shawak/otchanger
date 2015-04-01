@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using NLua;
+using ShawLib;
 
 namespace otchanger
 {
@@ -59,6 +61,29 @@ namespace otchanger
             foreach (var method in type.GetMethods())
                 if (method.IsPublic && !method.IsVirtual && !method.IsSecuritySafeCritical)
                     lua.RegisterFunction(!extractFromClass ? (type.Name + "." + method.Name) : method.Name, lua, method);
+        }
+
+        public static void write(Memory mem, IntPtr address, int val)
+        {
+            var size = new UIntPtr((uint)val.MemSize());
+            var protection = mem.RemoveProtection(address, size);
+            mem.Write(address, val);
+            mem.AddProtection(address, size, protection);
+        }
+
+        public static void dump(object o)
+        {
+            print(o.ToString() + " " + o.GetType().ToString());
+        }
+
+        public static IntPtr hex(string val)
+        {
+            return new IntPtr(Int64.Parse(val, NumberStyles.HexNumber));
+        }
+
+        public static void sleep(int time)
+        {
+            Thread.Sleep(time);
         }
 
         public static void exit()

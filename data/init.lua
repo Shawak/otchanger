@@ -5,6 +5,7 @@ import('System.Drawing')
 import('System.Diagnostics')
 import('System.Windows.Forms')
 import('System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a')
+import('ShawLib')
 
 config = {
 	console = true,
@@ -62,7 +63,8 @@ otchanger.init = function()
 	manager:explore(config.dirs.programmsX86 .. 'Tibia/')
 	
 	local client = manager:start('10.70')
-
+	client:setHost(nil, nil, nil)
+	
 	frmMain():Show()
 end
 
