@@ -1,10 +1,8 @@
 clientManager = class()
 
-local clients = {}
-local procs = {}
-
 function clientManager:__init()
-
+	self.clients = {}
+	self.procs = {}
 end
 
 function clientManager:load()
@@ -18,14 +16,14 @@ function clientManager:save()
 end
 
 function clientManager:start(version)
-	local fileInfo = clients[version]
+	local fileInfo = self.clients[version]
 	if not fileInfo then
 		return nil
 	end
 
 	local client = client(fileInfo)
 	client:start()
-	procs[#procs + 1] = client
+	self.procs[#self.procs + 1] = client
 	return client
 end
 
@@ -48,7 +46,7 @@ function clientManager:explore(dir)
 			end
 			version = version:insert(-2, '.')
 			print('client version ' .. version .. ' found in ' .. dir)
-			clients[version] = FileInfo(files[i])
+			self.clients[version] = FileInfo(files[i])
 			found = found + 1
 		end
 	end
@@ -62,7 +60,7 @@ function clientManager:explore(dir)
 end
 
 function clientManager:shutdown()
-	for i = 1, #procs do
-		procs[i]:close()
+	for i = 1, #self.procs do
+		self.procs[i]:close()
 	end
 end

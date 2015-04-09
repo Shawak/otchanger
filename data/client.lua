@@ -11,21 +11,19 @@ function client:start()
 	info.FileName = self.file
 	info.WorkingDirectory = self.dir
 
-	self.proc = Process()
-	self.proc.StartInfo = info
-	self.proc:Start()
-	self.proc:WaitForInputIdle()
+	local proc = Process()
+	proc.StartInfo = info
+	proc:Start()
+	proc:WaitForInputIdle()
+	self.proc = proc
 end
 
 function client:close()
-	pcall(function()
-		self.proc:Close()
-		self.proc:WaitForExit()
-	end)
+	TerminateProcess(self.proc.Handle, 0)
 end
 
 function client:setHost(ip, port, rsa)
-	local mem = Memory(self.proc)
+	local mem = Memory(self.proc.Id)
 
 	local addr = mem:FindPattern(bytes('login01.tibia.com'))
 	print(addr:ToString())

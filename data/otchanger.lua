@@ -52,7 +52,10 @@ otchanger.init = function()
 end
 
 otchanger.exit = function()
-	manager:shutdown()
+	if config.closeClientsOnShutdown then
+		manager:shutdown()
+	end
+
 	manager:save()
 	exit()
 end

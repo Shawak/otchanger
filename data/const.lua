@@ -1,6 +1,7 @@
 
 config = {
 	console = true,
+	closeClientsOnShutdown = true
 }
 
 config.dirs = {}

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -12,7 +13,10 @@ namespace otchanger
 {
     static class App
     {
-        static bool stop;
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
+
         static Lua lua;
 
         [STAThread]
@@ -20,6 +24,7 @@ namespace otchanger
         {
             new Thread(() =>
             {
+                Application.ThreadException += Application_ThreadException;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(start());
@@ -28,8 +33,15 @@ namespace otchanger
                 IsBackground = true
             }.Start();
 
-            while (!stop)
+            while (true)
                 Thread.Sleep(1);
+        }
+
+        static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            showConsole();
+            showException(e.Exception);
+            exit(true);
         }
 
         static Starter start()
@@ -50,11 +62,8 @@ namespace otchanger
                         return;
                     }
 
-                showConsole();
                 print("cannot find init.lua!");
-                print("press any key to exit..");
-                Console.ReadKey(true);
-                exit();
+                exit(true);
             });
         }
 
@@ -95,9 +104,22 @@ namespace otchanger
             return new IntPtr(Int64.Parse(val, NumberStyles.HexNumber));
         }
 
-        public static void exit()
+        public static void exit(bool wait = false)
         {
-            stop = true;
+            if (wait)
+            {
+                print("press any key to exit..");
+                Console.ReadKey(true);
+            }
+
+            try
+            {
+                Application.Exit();
+            }
+            catch
+            { }  // don't handle any lua script errors during shutdown
+
+            Environment.Exit(0);
         }
 
         public static void print(string str)
