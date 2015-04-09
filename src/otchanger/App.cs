@@ -22,28 +22,7 @@ namespace otchanger
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new Starter(() =>
-                {
-                    lua = new Lua();
-                    lua.LoadCLRPackage();
-                    registerLuaClass(lua, typeof(App), true);
-                    registerLuaClass(lua, typeof(NativeMethods));
-
-                    foreach (var file in new[] { "data/init.lua", "../data/init.lua", "init.lua" })
-                        if (File.Exists(file))
-                        {
-                            var fileInfo = new FileInfo(file);
-                            Directory.SetCurrentDirectory(fileInfo.Directory.FullName);
-                            dofile(fileInfo.FullName);
-                            return;
-                        }
-
-                    NativeMethods.AllocConsole();
-                    print("cannot find init.lua!");
-                    print("press any key to exit..");
-                    Console.ReadKey(true);
-                    exit();
-                }));
+                Application.Run(start());
             })
             {
                 IsBackground = true
@@ -51,6 +30,32 @@ namespace otchanger
 
             while (!stop)
                 Thread.Sleep(1);
+        }
+
+        static Starter start()
+        {
+            return new Starter(() =>
+            {
+                lua = new Lua();
+                lua.LoadCLRPackage();
+                registerLuaClass(lua, typeof(App), true);
+                registerLuaClass(lua, typeof(NativeMethods));
+
+                foreach (var file in new[] { "data/init.lua", "../data/init.lua", "init.lua" })
+                    if (File.Exists(file))
+                    {
+                        var fileInfo = new FileInfo(file);
+                        Directory.SetCurrentDirectory(fileInfo.Directory.FullName);
+                        dofile(fileInfo.FullName);
+                        return;
+                    }
+
+                showConsole();
+                print("cannot find init.lua!");
+                print("press any key to exit..");
+                Console.ReadKey(true);
+                exit();
+            });
         }
 
         static void registerLuaClass(Lua lua, Type type, bool extractFromClass = false)
@@ -69,6 +74,10 @@ namespace otchanger
             var protection = mem.RemoveProtection(address, size);
             mem.Write(address, val);
             mem.AddProtection(address, size, protection);
+
+            var proc = new Process();
+            proc.Close();
+            proc.WaitForExit();
         }
 
         public static int readInt(Memory mem, IntPtr address)
@@ -109,18 +118,7 @@ namespace otchanger
             }
             catch (Exception ex)
             {
-                showException(ex);
-            }
-        }
-
-        public static void dostring(string str)
-        {
-            try
-            {
-                lua.DoString(str);
-            }
-            catch (Exception ex)
-            {
+                showConsole();
                 showException(ex);
             }
         }
@@ -145,6 +143,26 @@ namespace otchanger
                 sb.AppendLine();
             }
             return sb.ToString();
+        }
+
+        static bool shown;
+
+        public static void showConsole()
+        {
+            if (shown)
+                return;
+
+            shown = true;
+            NativeMethods.AllocConsole();
+        }
+
+        public static void hideConsole()
+        {
+            if (!shown)
+                return;
+
+            shown = false;
+            NativeMethods.FreeConsole();
         }
     }
 }

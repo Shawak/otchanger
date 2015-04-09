@@ -18,15 +18,20 @@ function client:start()
 end
 
 function client:close()
-	self.proc:Close()
-	self.proc:WaitForExit()
+	pcall(function()
+		self.proc:Close()
+		self.proc:WaitForExit()
+	end)
 end
 
 function client:setHost(ip, port, rsa)
 	local mem = Memory(self.proc)
-	local addr = mem:FindPattern(hex('04000000'), 'xxxxxxxxxxxxxxxx', Encoding.UTF8:GetBytes('login01.tibia.com'))
+
+	local addr = mem:FindPattern(bytes('login01.tibia.com'))
 	print(addr:ToString())
-	print("done")
-	--write(mem, hex('0058E408'), 42)
+
+	addr = mem:FindPattern(bytes(CIPSOFT_RSA))
+	print(addr:ToString())
+
 	mem:Dispose()
 end

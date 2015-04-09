@@ -1,6 +1,7 @@
 clientManager = class()
 
 local clients = {}
+local procs = {}
 
 function clientManager:__init()
 
@@ -24,6 +25,7 @@ function clientManager:start(version)
 
 	local client = client(fileInfo)
 	client:start()
+	procs[#procs + 1] = client
 	return client
 end
 
@@ -57,4 +59,10 @@ function clientManager:explore(dir)
 	end
 
 	return found
+end
+
+function clientManager:shutdown()
+	for i = 1, #procs do
+		procs[i]:close()
+	end
 end
