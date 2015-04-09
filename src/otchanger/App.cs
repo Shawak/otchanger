@@ -74,10 +74,6 @@ namespace otchanger
             var protection = mem.RemoveProtection(address, size);
             mem.Write(address, val);
             mem.AddProtection(address, size, protection);
-
-            var proc = new Process();
-            proc.Close();
-            proc.WaitForExit();
         }
 
         public static int readInt(Memory mem, IntPtr address)
