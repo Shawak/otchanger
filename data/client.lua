@@ -24,6 +24,9 @@ end
 
 function client:setHost(ip, port, rsa)
 	local mem = Memory(self.proc)
-	write(mem, hex('0058E408'), 42)
+	local addr = mem:FindPattern(hex('04000000'), 'xxxxxxxxxxxxxxxx', Encoding.UTF8:GetBytes('login01.tibia.com'))
+	print(addr:ToString())
+	print("done")
+	--write(mem, hex('0058E408'), 42)
 	mem:Dispose()
 end

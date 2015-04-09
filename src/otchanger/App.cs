@@ -71,6 +71,15 @@ namespace otchanger
             mem.AddProtection(address, size, protection);
         }
 
+        public static int readInt(Memory mem, IntPtr address)
+        {
+            var size = new UIntPtr(4);
+            var protection = mem.RemoveProtection(address, size);
+            var ret = mem.Read<int>(address);
+            mem.AddProtection(address, size, protection);
+            return ret;
+        }
+
         public static void dump(object o)
         {
             print(o.ToString() + " " + o.GetType().ToString());
@@ -79,11 +88,6 @@ namespace otchanger
         public static IntPtr hex(string val)
         {
             return new IntPtr(Int64.Parse(val, NumberStyles.HexNumber));
-        }
-
-        public static void sleep(int time)
-        {
-            Thread.Sleep(time);
         }
 
         public static void exit()
