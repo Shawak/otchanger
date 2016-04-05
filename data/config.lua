@@ -5,14 +5,12 @@ config = {
 }
 
 config.dirs = {}
-config.dirs.appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-config.dirs.settings = config.dirs['appdata'] .. '/otchanger/settings/'
+config.dirs.appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) .. '/'
+config.dirs.settings = config.dirs.appdata .. 'otchanger/settings/'
 config.dirs.programmsX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) .. '/'
 
 config.files = {}
 config.files.clients = config.dirs.settings .. 'clients.json'
-
-
 
 
 -- taken from otclient

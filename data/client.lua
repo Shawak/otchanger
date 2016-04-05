@@ -19,7 +19,7 @@ function client:start()
 end
 
 function client:close()
-	TerminateProcess(self.proc.Handle, 0)
+	NativeMethods.TerminateProcess(self.proc.Handle, 0)
 end
 
 function client:setHost(ip, port, rsa)

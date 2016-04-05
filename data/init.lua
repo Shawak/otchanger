@@ -1,1 +1,0 @@
-dofile('otchanger.lua')

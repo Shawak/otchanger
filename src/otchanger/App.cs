@@ -1,23 +1,19 @@
-﻿using System;
+﻿using NLua;
+using ShawLib;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using NLua;
-using ShawLib;
 
 namespace otchanger
 {
     static class App
     {
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
-
         static Lua lua;
+        static bool shown;
 
         [STAThread]
         static void Main()
@@ -53,7 +49,7 @@ namespace otchanger
                 registerLuaClass(lua, typeof(App), true);
                 registerLuaClass(lua, typeof(NativeMethods));
 
-                foreach (var file in new[] { "data/init.lua", "../data/init.lua", "init.lua" })
+                foreach (var file in new[] { "data/otchanger.lua", "../data/otchanger.lua", "otchanger.lua" })
                     if (File.Exists(file))
                     {
                         var fileInfo = new FileInfo(file);
@@ -62,7 +58,8 @@ namespace otchanger
                         return;
                     }
 
-                print("cannot find init.lua!");
+                showConsole();
+                print("cannot find otchanger.lua!");
                 exit(true);
             });
         }
@@ -77,7 +74,7 @@ namespace otchanger
                     lua.RegisterFunction(!extractFromClass ? (type.Name + "." + method.Name) : method.Name, lua, method);
         }
 
-        public static void write(Memory mem, IntPtr address, int val)
+        public static void writeInt(Memory mem, IntPtr address, int val)
         {
             var size = new UIntPtr((uint)val.MemSize());
             var protection = mem.RemoveProtection(address, size);
@@ -109,7 +106,8 @@ namespace otchanger
             if (wait)
             {
                 print("press any key to exit..");
-                Console.ReadKey(true);
+                if (shown)
+                    Console.ReadKey(true);
             }
 
             try
@@ -162,8 +160,6 @@ namespace otchanger
             }
             return sb.ToString();
         }
-
-        static bool shown;
 
         public static void showConsole()
         {

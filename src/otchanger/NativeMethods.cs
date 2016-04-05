@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace otchanger
 {
@@ -9,5 +10,8 @@ namespace otchanger
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool FreeConsole();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
     }
 }

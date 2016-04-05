@@ -11,8 +11,10 @@ local manager
 
 otchanger = {}
 otchanger.init = function()
+	--print('otchanger\nLua Version: ' .. _VERSION .. '\n\n')
+
 	-- load constants
-	dofile('const.lua')
+	dofile('config.lua')
 
 	-- laod libs
 	dofile('libs/core.lua')
@@ -32,7 +34,6 @@ otchanger.init = function()
 	if (config.console) then
 		showConsole()
 	end
-	print('Running ' .. _VERSION)
 
 	-- create missing dirs to be able to create files
 	for k, v in pairs({config.dirs.appdata, config.dirs.settings}) do
