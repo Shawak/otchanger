@@ -1,9 +1,11 @@
 ﻿using NLua;
 using ShawLib;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -13,24 +15,15 @@ namespace otchanger
     static class App
     {
         static Lua lua;
-        static bool shown;
+        static bool console;
 
         [STAThread]
         static void Main()
         {
-            new Thread(() =>
-            {
-                Application.ThreadException += Application_ThreadException;
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(start());
-            })
-            {
-                IsBackground = true
-            }.Start();
-
-            while (true)
-                Thread.Sleep(1);
+            Application.ThreadException += Application_ThreadException;
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(start());
         }
 
         static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
@@ -59,46 +52,9 @@ namespace otchanger
                     }
 
                 showConsole();
-                print("cannot find otchanger.lua!");
+                print("can not find otchanger.lua!");
                 exit(true);
             });
-        }
-
-        static void registerLuaClass(Lua lua, Type type, bool extractFromClass = false)
-        {
-            if (!extractFromClass)
-                lua.DoString(type.Name + "={}");
-
-            foreach (var method in type.GetMethods())
-                if (method.IsPublic && !method.IsVirtual && !method.IsSecuritySafeCritical)
-                    lua.RegisterFunction(!extractFromClass ? (type.Name + "." + method.Name) : method.Name, lua, method);
-        }
-
-        public static void writeInt(Memory mem, IntPtr address, int val)
-        {
-            var size = new UIntPtr((uint)val.MemSize());
-            var protection = mem.RemoveProtection(address, size);
-            mem.Write(address, val);
-            mem.AddProtection(address, size, protection);
-        }
-
-        public static int readInt(Memory mem, IntPtr address)
-        {
-            var size = new UIntPtr(4);
-            var protection = mem.RemoveProtection(address, size);
-            var ret = mem.Read<int>(address);
-            mem.AddProtection(address, size, protection);
-            return ret;
-        }
-
-        public static void dump(object o)
-        {
-            print(o.ToString() + " " + o.GetType().ToString());
-        }
-
-        public static IntPtr hex(string val)
-        {
-            return new IntPtr(Int64.Parse(val, NumberStyles.HexNumber));
         }
 
         public static void exit(bool wait = false)
@@ -106,7 +62,7 @@ namespace otchanger
             if (wait)
             {
                 print("press any key to exit..");
-                if (shown)
+                if (console)
                     Console.ReadKey(true);
             }
 
@@ -120,10 +76,16 @@ namespace otchanger
             Environment.Exit(0);
         }
 
-        public static void print(string str)
+        public static void print(object obj)
         {
-            Debug.WriteLine(str);
-            Console.WriteLine(str);
+            Debug.WriteLine(obj);
+            if (console)
+                Console.WriteLine(obj);
+        }
+
+        public static void dump(object o)
+        {
+            print(o.ToString() + " " + o.GetType().ToString());
         }
 
         public static void dofile(string file)
@@ -143,7 +105,7 @@ namespace otchanger
         {
             do
             {
-                Console.WriteLine(ex);
+                print(ex);
                 ex = ex.InnerException;
             } while (ex != null);
         }
@@ -163,20 +125,70 @@ namespace otchanger
 
         public static void showConsole()
         {
-            if (shown)
+            if (console)
                 return;
 
-            shown = true;
             NativeMethods.AllocConsole();
+            console = true;
         }
 
         public static void hideConsole()
         {
-            if (!shown)
+            if (!console)
                 return;
 
-            shown = false;
+            console = false;
             NativeMethods.FreeConsole();
         }
+
+        static void registerLuaClass(Lua lua, Type type, bool extractFromClass = false)
+        {
+            if (!extractFromClass)
+                lua.DoString(type.Name + "={}");
+
+            foreach (var method in type.GetMethods())
+                if (method.IsPublic && !method.IsVirtual && !method.IsSecuritySafeCritical)
+                    lua.RegisterFunction(!extractFromClass ? (type.Name + "." + method.Name) : method.Name, lua, method);
+        }
+
+        public static Array toArray(LuaTable table, Type t)
+        {
+            var arr = Array.CreateInstance(t, table.Values.Count);
+            int i = 0;
+            foreach (var val in table.Values)
+                arr.SetValue(Convert.ChangeType(val, t), i++);
+            return arr;
+        }
+
+        public static byte[] getBytes(object val)
+        {
+            if (val.GetType() == typeof(double))
+                val = Convert.ToInt64(val);
+            var ret = ((IConvertible)val).GetBytes();
+            return ret;
+        }
+
+        static void write(Memory mem, IntPtr addr, IConvertible val)
+        {
+            var size = val.GetType() == typeof(string) ? ((string)val).Length : val.MemSize();
+            var protection = mem.RemoveProtection(addr, size);
+            mem.Write(addr, (string)val);
+            mem.AddProtection(addr, size, protection);
+        }
+
+        static T read<T>(Memory mem, IntPtr addr) where T : IConvertible
+        {
+            var size = typeof(T) == typeof(string) ? 309 : typeof(T).MemSize();
+            var protection = mem.RemoveProtection(addr, size);
+            var ret = mem.Read<T>(addr);
+            mem.AddProtection(addr, size, protection);
+            return ret;
+        }
+
+        public static void writeInt(Memory mem, IntPtr addr, IConvertible val) { write(mem, addr, val); }
+        public static void writeString(Memory mem, IntPtr addr, string val) { write(mem, addr, val); }
+
+        public static int readInt(Memory mem, IntPtr addr) { return read<int>(mem, addr); }
+        public static string readString(Memory mem, IntPtr addr) { return read<string>(mem, addr); }
     }
 }

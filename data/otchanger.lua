@@ -46,9 +46,9 @@ otchanger.init = function()
 	manager:load()
 	manager:explore(config.dirs.programmsX86 .. 'Tibia/')
 	
-	local client = manager:start('10.70')
+	local client = manager:start('7.60')
 	client:setHost(nil, nil, nil)
-	
+
 	frmMain():Show()
 end
 

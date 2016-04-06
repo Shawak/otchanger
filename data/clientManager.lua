@@ -18,7 +18,7 @@ end
 function clientManager:start(version)
 	local fileInfo = self.clients[version]
 	if not fileInfo then
-		return nil
+		return false
 	end
 
 	local client = client(fileInfo)
